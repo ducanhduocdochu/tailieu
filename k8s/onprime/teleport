@@ -39,6 +39,19 @@ vi /etc/systemd/system/teleport.service
 # systemctl start teleport
 # systemctl status teleport
 
+[Unit]
+Description=Teleport Service
+Documentation=https://gravitational.com/teleport/docs
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/local/bin/teleport start --config=/etc/teleport/teleport.yaml
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
 
 tctl users add admin --roles=editor,access --logins=root
 
