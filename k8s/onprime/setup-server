@@ -12,6 +12,14 @@ netplan apply
 check by ip a
 
 => take snapshot
+
+
+-----------
+sau khi tạo snapshot
+/etc/netplan
+netplan apply
+/etc/hosts
+reboot
   
 
 
