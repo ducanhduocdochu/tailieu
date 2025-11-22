@@ -1,0 +1,17 @@
+set static ip
+sudo -i => user root
+nano /etc/netplan/...yaml
+card mạng => dhcp true => false
+thêm 
+addresses: [192.168.1.110/24]
+gateway4: 192.168.1.1
+nameserver:
+  [8.8.8.8.8.8.4.4]
+=> ctrl x 
+netplan apply
+check by ip a
+
+=> take snapshot
+  
+
+
