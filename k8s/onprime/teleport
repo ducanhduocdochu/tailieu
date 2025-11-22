@@ -38,3 +38,13 @@ vi /etc/systemd/system/teleport.service
 # systemctl daemon-reload
 # systemctl start teleport
 # systemctl status teleport
+
+
+tctl users add admin --roles=editor,access --logins=root
+
+
+// setting for cloud
+# curl https://cdn.teleport.dev/install.sh | bash -s 17.0.5
+# teleport configure -o file --acme --acme-email=elroydevops@gmail.com --cluster-name=teleport.devopseduvn.live
+>> Comment phần acme trong file teleport.yaml
+
