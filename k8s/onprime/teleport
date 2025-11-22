@@ -45,6 +45,6 @@ tctl users add admin --roles=editor,access --logins=root
 
 // setting for cloud
 # curl https://cdn.teleport.dev/install.sh | bash -s 17.0.5
-# teleport configure -o file --acme --acme-email=elroydevops@gmail.com --cluster-name=teleport.devopseduvn.live
+# teleport configure -o file --acme --acme-email=tducanh263@gmail.com --cluster-name=teleport.ducanh.online
 >> Comment phần acme trong file teleport.yaml
 
