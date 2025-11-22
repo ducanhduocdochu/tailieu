@@ -5,3 +5,36 @@
 # mv teleport/teleport /usr/local/bin/
 # teleport version && tctl version && tsh version
 # mkdir -p /etc/teleport
+
+vi /etc/teleport/teleport.yaml
+version: v3
+teleport:
+  nodename: teleport
+  data_dir: /var/lib/teleport
+  log:
+    output: stderr
+    severity: INFO
+    format:
+      output: text
+  ca_pin: ""
+  diag_addr: ""
+auth_service:
+  enabled: "yes"
+  listen_addr: 0.0.0.0:3025
+  cluster_name: teleport-onpre.ducanh.io.vn
+  proxy_listener_mode: multiplex
+ssh_service:
+  enabled: "yes"
+proxy_service:
+  enabled: "yes"
+  web_listen_addr: 0.0.0.0:443
+  public_addr: teleport-onpre.ducanh.io.vn:443
+  https_keypairs: []
+  https_keypairs_reload_interval: 0s
+
+
+
+vi /etc/systemd/system/teleport.service
+# systemctl daemon-reload
+# systemctl start teleport
+# systemctl status teleport
