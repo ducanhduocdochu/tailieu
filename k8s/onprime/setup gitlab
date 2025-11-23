@@ -1,0 +1,9 @@
+# curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | sudo bash
+# apt install gitlab-ee=15.7.7-ee.0
+
+# sudo certbot certonly --standalone -d gitlab.devopseduvn.live --preferred-challenges http --agree-tos -m $EMAIL --keep-until-expiring
+
+nano /etc/gitlab/gitlab.rb
+
+sửa external_url = https://gitlab.ducanh.io.vn
+sudo gitlab-ctl reconfigure
