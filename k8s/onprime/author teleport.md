@@ -59,3 +59,5 @@ spec:
       - resources: ["node"]
         verbs: ["*"]
 ```
+
+gán nhãn vào server, trong /etc/teleport.yaml
