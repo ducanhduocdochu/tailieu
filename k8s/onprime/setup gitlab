@@ -9,3 +9,5 @@ sửa external_url = https://gitlab.ducanh.io.vn
 letsencrypt['enable'] = true
 letsencrypt['contact_emails'] = ['youremail@domain.com']
 sudo gitlab-ctl reconfigure
+
+check status sudo gitlab-ctl status
