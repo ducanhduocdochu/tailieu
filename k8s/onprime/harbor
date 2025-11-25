@@ -1,0 +1,45 @@
+# Cài docker
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg lsb-release
+
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+docker --version
+  
+sudo curl -L "https://github.com/docker/compose/releases/download/2.27.1/docker-compose-$(uname -s)-$(uname -m)" \
+  -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+
+# curl -s https://api.github.com/repos/goharbor/harbor/releases/latest | grep browser_download_url | cut -d '"' -f 4 | grep '.tgz$' | wget -i -
+# tar xvzf harbor-offline-installer*.tgz
+# cd harbor/
+# cp harbor.yml.tmpl harbor.yml
+
+sudo mkdir -p /etc/harbor/cert
+sudo nano /etc/harbor/cert/harbor.crt
+sudo nano /etc/harbor/cert/harbor.key
+# vi harbor.yml => sửa hostname, cert
+
+```
+hostname: harbor.devopseduvn.live
+
+http:
+  port: 80
+
+https:
+  port: 443
+  certificate: /etc/harbor/cert/harbor.crt
+  private_key: /etc/harbor/cert/harbor.key
+```
+
+# ./prepare
+# ./install.sh
