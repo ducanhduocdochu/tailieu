@@ -1,18 +1,12 @@
-sudo apt update
-sudo apt install -y openjdk-11-jdk
-java -version
-sudo rm -f /usr/share/keyrings/jenkins-keyring.asc
-sudo rm -f /etc/apt/sources.list.d/jenkins.list
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
-  | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
-ls -l /usr/share/keyrings/jenkins-keyring.asc
-echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-  https://pkg.jenkins.io/debian-stable binary/ \
-  | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-sudo apt update
-apt-cache madison jenkins
-sudo apt install -y jenkins=2.319.3
-sudo apt-mark hold jenkins
+apt install openjdk-17-jdk openjdk-17-jre -y
+java --version
+wget -p -O - https://pkg.jenkins.io/debian/jenkins.io.key | apt-key add -
+sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5BA31D57EF5975CA
+apt-get update
+apt install jenkins -y
+systemctl start jenkins
+ufw allow 8080
 
 sudo mkdir -p /etc/jenkins/ssl
 sudo chmod 700 /etc/jenkins/ssl
