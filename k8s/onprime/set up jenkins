@@ -1,0 +1,52 @@
+sudo apt update
+sudo apt install -y openjdk-11-jdk
+java -version
+sudo rm -f /usr/share/keyrings/jenkins-keyring.asc
+sudo rm -f /etc/apt/sources.list.d/jenkins.list
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
+  | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+ls -l /usr/share/keyrings/jenkins-keyring.asc
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian-stable binary/ \
+  | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt update
+apt-cache madison jenkins
+sudo apt install -y jenkins=2.319.3
+sudo apt-mark hold jenkins
+
+sudo mkdir -p /etc/jenkins/ssl
+sudo chmod 700 /etc/jenkins/ssl
+sudo nano /etc/jenkins/ssl/jenkins.ducanh.io.vn.crt
+sudo chmod 644 /etc/jenkins/ssl/jenkins.ducanh.io.vn.crt
+sudo nano /etc/jenkins/ssl/jenkins.ducanh.io.vn.key
+sudo chmod 600 /etc/jenkins/ssl/jenkins.ducanh.io.vn.key
+
+sudo apt install -y nginx
+sudo nano /etc/nginx/sites-available/jenkins
+server {
+    listen 443 ssl;
+    server_name jenkins.ducanh.io.vn;
+
+    ssl_certificate     /etc/jenkins/ssl/jenkins.ducanh.io.vn.crt;
+    ssl_certificate_key /etc/jenkins/ssl/jenkins.ducanh.io.vn.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+sudo ln -s /etc/nginx/sites-available/jenkins /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
