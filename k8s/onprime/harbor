@@ -25,8 +25,15 @@ docker-compose --version
 # cp harbor.yml.tmpl harbor.yml
 
 sudo mkdir -p /etc/harbor/cert
+
+sudo chmod 755 /etc/harbor
+sudo chmod 755 /etc/harbor/cert
+
 sudo nano /etc/harbor/cert/harbor.crt
 sudo nano /etc/harbor/cert/harbor.key
+
+sudo chmod 644 /etc/harbor/cert/harbor.crt
+sudo chmod 600 /etc/harbor/cert/harbor.key
 # vi harbor.yml => sửa hostname, cert
 
 ```
