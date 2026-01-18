@@ -101,3 +101,8 @@ kubectl taint nodes k8s-master-2 node-role.kubernetes.io/control-plane:NoSchedul
 kubectl taint nodes k8s-master-3 node-role.kubernetes.io/control-plane:NoSchedule-
 
 helm -n ingress-nginx install ingress-nginx -f ingress-nginx/values.yaml ingress-nginx
+
+# fix lỗi get node không thành công
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
