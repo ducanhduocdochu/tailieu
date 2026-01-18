@@ -144,3 +144,80 @@ sudo chmod 2775 /var/run/postgresql
 
 systemctl enable patroni
 systemctl start patroni
+
+Sau khi restart ec2
+sudo mkdir -p /var/run/postgresql
+sudo chown postgres:postgres /var/run/postgresql
+sudo chmod 2775 /var/run/postgresql
+
+sudo systemctl reset-failed patroni
+sudo systemctl restart patroni
+sudo systemctl status patroni --no-pager -l
+
+sudo tee /etc/tmpfiles.d/postgresql.conf >/dev/null <<'EOF'
+d /var/run/postgresql 2775 postgres postgres -
+EOF
+
+sudo systemd-tmpfiles --create
+
+//// fix lỗi stoped thay vì stream
+Mở leader 
+sudo tee -a /var/lib/postgresql/15/main/pg_hba.conf >/dev/null <<'EOF'
+host replication replicator 172.31.22.35/32 md5
+host replication replicator 172.31.23.63/32 md5
+EOF
+
+chạy config 
+sudo -u postgres psql -c "select pg_reload_conf();"
+verify
+sudo -u postgres egrep -n "replication|172.31" /var/lib/postgresql/15/main/pg_hba.conf
+reinit
+sudo patronictl -c /etc/patroni/patroni.yml reinit cluster_1 ip-172-31-22-35.ap-southeast-2.compute.internal --force
+sudo patronictl -c /etc/patroni/patroni.yml reinit cluster_1 ip-172-31-23-63.ap-southeast-2.compute.internal --force
+
+
+/// ha proxy
+apt-get update
+apt install haproxy -y
+mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.org
+vi /etc/haproxy/haproxy.cfg
+
+global
+    maxconn 100                # Maximum number of concurrent connections
+
+defaults
+    log global                 # Use global logging configuration
+    mode tcp                   # TCP mode for PostgreSQL connections
+    retries 2                  # Number of retries before marking a server as failed
+    timeout client 30m         # Maximum time to wait for client data
+    timeout connect 4s         # Maximum time to establish connection to server
+    timeout server 30m         # Maximum time to wait for server response
+    timeout check 5s           # Maximum time to wait for health check response
+
+listen stats                # Statistics monitoring 
+    mode http              # The protocol for web-based stats UI
+    bind *:7000            # Port to listen to on all network interfaces
+    stats enable           # Statistics reporting interface
+    stats uri /stats       # URL path for the stats page
+    stats auth percona:myS3cr3tpass    # Username:password authentication
+
+listen primary
+    bind *:5000                        # Port for write connections
+    option httpchk /primary 
+    http-check expect status 200  
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions  # Server health check parameters
+    server node1 node1:5432 maxconn 100 check port 8008 
+    server node2 node2:5432 maxconn 100 check port 8008  
+    server node3 node3:5432 maxconn 100 check port 8008 
+
+listen standbys
+    balance roundrobin     # Round-robin load balancing for read connections
+    bind *:5001            # Port for read connections
+    option httpchk /replica 
+    http-check expect status 200  
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions  # Server health check parameters
+    server node1 node1:5432 maxconn 100 check port 8008  
+    server node2 node2:5432 maxconn 100 check port 8008  
+    server node3 node3:5432 maxconn 100 check port 8008
+
+sudo systemctl restart haproxy
