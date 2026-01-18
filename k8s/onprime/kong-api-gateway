@@ -1,0 +1,121 @@
+thêm cài đặt vào database
+
+su postgres
+psql
+CREATE USER kong WITH PASSWORD 'ducanhdeptrai123';
+CREATE DATABASE kong;
+GRANT ALL PRIVILEGES ON DATABASE kong to kong;
+/c kong;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public to kong;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public to kong;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public to kong;
+
+mkdir kong
+helm repo add kong https://charts.konghq.com
+kubectl create ns kong
+
+vi values.yaml
+namespace: kong
+
+ingressController:
+  enabled: true
+
+proxy:
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 8000
+  tls:
+    enabled: false
+
+admin:
+  enabled: true
+  type: ClusterIP
+
+  http:
+    enabled: true
+    servicePort: 8001
+    containerPort: 8001
+  ingress:
+    enabled: false
+
+env:
+  admin_gui_url: "http://kong-manager.ducanh.io.vn"
+  admin_gui_api_url: "http://kong-admin.ducanh.io.vn"
+
+  database: postgres
+  pg_database: kong
+  pg_user: kong
+  pg_password: ducanhdeptrai123
+  pg_host: postgres15.database.svc.cluster.local
+
+manager:
+  enabled: true
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 8002
+    containerPort: 8002
+  tls:
+    enabled: false
+  ingress:
+    enabled: false
+
+helm install gw kong/kong -f values.yaml -n kong
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-manager-ingress
+  namespace: kong
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kong-manager.devopseduvn.live
+      http:
+        paths:
+          - backend:
+              service:
+                name: gw-kong-manager
+                port:
+                  number: 8002
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-admin-ingress
+  namespace: kong
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kong-admin.devopseduvn.live
+      http:
+        paths:
+          - backend:
+              service:
+                name: gw-kong-admin
+                port:
+                  number: 8001
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kong-proxy-ingress
+  namespace: kong
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: gw.devopseduvn.live
+      http:
+        paths:
+          - backend:
+              service:
+                name: gw-kong-proxy
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix
