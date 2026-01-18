@@ -221,3 +221,16 @@ listen standbys
     server node3 node3:5432 maxconn 100 check port 8008
 
 sudo systemctl restart haproxy
+
+✅ Fix chặt hơn (chỉ allow đúng HAProxy node)
+
+Nếu HAProxy nằm trên node1 172.31.19.96 thì thêm:
+
+sudo tee -a /var/lib/postgresql/15/main/pg_hba.conf >/dev/null <<'EOF'
+host    all     postgres     172.31.19.96/32      md5
+EOF
+
+
+Reload:
+
+sudo -u postgres psql -c "select pg_reload_conf();"
