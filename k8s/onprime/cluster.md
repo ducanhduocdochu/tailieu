@@ -1,16 +1,17 @@
-echo -e "192.168.100.105 k8s-master-1n192.168.100.106 k8s-master-2n192.168.100.107 k8s-master-3" | sudo tee -a /etc/hosts
+echo -e "192.168.41.105 k8s-master-1\n192.168.41.106 k8s-master-2\n192.168.41.107 k8s-master-3" | sudo tee -a /etc/hosts
 
 sudo apt update -y && sudo apt upgrade -y
 
 # phân quyền
 adduser devops
 visudo
+thêm devops ALL=(ALL:ALL) ALL
 su devops
 cd /home/devops
 
 # tắt swap, lưu cấu hình
 sudo swapoff -a
-sudo sed -i '/swap.img/s/^/#/' /etc/fsta
+sudo sed -i '/swap.img/s/^/#/' /etc/fstab
 
 # cấu hình module kernel
 echo -e "overlaynbr_netfilter" | sudo tee /etc/modules-load.d/containerd.conf > /dev/null
@@ -61,7 +62,7 @@ sudo rm -rf /var/lib/etcd
 sudo rm -rf /etc/kubernetes/manifests/*
 
 # Thực hiện trên server k8s-master-1
-sudo kubeadm init --control-plane-endpoint "192.168.100.105:6443" --upload-certs
+sudo kubeadm init --control-plane-endpoint "192.168.100.101:6443" --upload-certs
 mkdir -p $HOME/.kube 
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config 
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
