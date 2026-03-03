@@ -29,12 +29,16 @@ cat /var/log/syslog | grep kube-apiserver: lọc log liên quan đến kube-apis
 
 # 3
 kubectl -n kube-system get pod
+
 kubectl -n kube-system logs kube-controller-manager-controlplane
 
 # 4 
 ssh node01: ssh vào node
+
 cat /var/log/syslog | grep kubelet: xem log node
+
 service kubelet restart: restart kubelet
+
 service kubelet status
 
 # 5
