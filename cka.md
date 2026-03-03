@@ -43,7 +43,11 @@ service kubelet status
 
 # 5
 k -n application1 get deploy: lấy deployment
+
 k -n application1 logs deploy/api: lấy log deploy
+
 k -n application1 describe deploy api: miêu tả deploy 
+
 k -n application1 get cm: lấy configmap
+
 k -n application1 edit deploy api: sửa deployment
