@@ -42,7 +42,8 @@ vault write auth/kubernetes/role/eso-role \
   policies=eso-policy \
   ttl=24h
 
-apiVersion: external-secrets.io/v1beta1
+```
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: vault-backend
@@ -50,28 +51,40 @@ metadata:
 spec:
   provider:
     vault:
-      server: "http://vault.vault:8200"
-      path: "secret"
+      server: "http://vault.vault.svc.cluster.local:8200"
+      path: "kv"
       version: "v2"
       auth:
         kubernetes:
           mountPath: "kubernetes"
-          role: "eso-role"
+          role: "backend-auth-role"
+          serviceAccountRef:
+            name: "vault-auth"
+            audiences:
+              - vault
+```
 
-apiVersion: external-secrets.io/v1beta1
+```
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: auth-secret
+  name: backend-auth-secret
   namespace: backend
 spec:
-  refreshInterval: 1m
+  refreshInterval: 1h
   secretStoreRef:
     name: vault-backend
     kind: SecretStore
   target:
-    name: auth-secret
+    name: backend-auth-secret
+    creationPolicy: Owner
   data:
-    - secretKey: Jwt__Secret
+    - secretKey: JWT_SECRET
       remoteRef:
-        key: auth
-        property: Jwt__Secret
+        key: backend/auth
+        property: JWT_SECRET
+    - secretKey: URL_CONNECT_DB
+      remoteRef:
+        key: backend/auth
+        property: URL_CONNECT_DB
+```
